@@ -106,7 +106,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
             titleText.setText("中国");
             currentLevel = LEVEL_PROVINCE;
         } else {
-            queryFromServer(null, "province");
+            queryFromServer("province");
         }
     }
 
@@ -125,7 +125,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
             titleText.setText(selecteddProvince.getProvinceName());
             currentLevel = LEVEL_CITY;
         } else {
-            queryFromServer(null, "city");
+            queryFromServer("city");
         }
     }
 
@@ -149,9 +149,14 @@ public class ChooseAreaActivity extends AppCompatActivity {
         }
     }
 
-    private void queryFromServer(final String code, final String type) {
+    private void queryFromServer(final String type) {
         String address;
-        address = "https://api.heweather.com/x3/citylist?search=allchina&key=ee0a81c3b4c449c6a2601eed6b8b28e8";
+        if ( "province".equals(type)) {
+            address = "http://www.baidu.com";
+        }
+        else {
+            address = "https://api.heweather.com/x3/citylist?search=allchina&key=ee0a81c3b4c449c6a2601eed6b8b28e8";
+        }
         showProgressDialog();
         HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
             @Override

@@ -17,7 +17,6 @@ public class HttpUtil {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.d("test","sendHttp");
                 HttpURLConnection connection = null;                                      //HttpURLConnection
                 try {
                     URL url = new URL(address);                   //指定访问的服务器地址
