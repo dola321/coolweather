@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.coolweather.app.model.City;
 import com.coolweather.app.model.Province;
@@ -55,7 +56,6 @@ public class CoolWeatherDB {
         if (province != null) {
             ContentValues values = new ContentValues();
             values.put("province_name", province.getProvinceName());
-            values.put("province_code", province.getProvinceCode());
             db.insert("Province", null, values);
         }
     }
@@ -69,9 +69,7 @@ public class CoolWeatherDB {
         if (cursor.moveToFirst()) {
             do {
                 Province province = new Province();
-                province.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 province.setProvinceName(cursor.getString(cursor.getColumnIndex("province_name")));
-                province.setProvinceCode(cursor.getString(cursor.getColumnIndex("province_code")));
                 list.add(province);
             }while (cursor.moveToNext());
         }
@@ -86,27 +84,56 @@ public class CoolWeatherDB {
             ContentValues values = new ContentValues();
             values.put("city_name", city.getCityName());
             values.put("city_code", city.getCityCode());
-            values.put("province_id", city.getProvinceId());
+            values.put("province_name", city.getProvinceName());
             db.insert("City", null, values);
         }
     }
 
     /*
-     *从数据库读取全国所有省份信息
+     *从数据库读取全国所有城市信息
      */
-    public List<City> loadCities( int provinceId) {
+    public List<City> loadCities( String provinceName) {
         List<City> list = new ArrayList<City>();
-        Cursor cursor = db.query("City", null, "provinceId = ?", new String[]{ String.valueOf(provinceId)}, null, null, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM City WHERE province_name = ? AND ( city_code LIKE '%0100%' OR city_code LIKE '%01' )",new String[]{provinceName});
         if (cursor.moveToFirst()) {
             do {
                 City city = new City();
                 city.setId(cursor.getInt(cursor.getColumnIndex("id")));
                 city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
                 city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
-                city.setProvinceId(provinceId);
+                city.setProvinceName(provinceName);
                 list.add(city);
             }while (cursor.moveToNext());
         }
+        return list;
+    }
+
+    /*
+     *从数据库读取某城市下各区信息
+     */
+    public List<City> loadCounties( String cityCode) {
+        List<City> list = new ArrayList<City>();
+
+        int fuckID = Integer.parseInt(cityCode.substring(2));
+
+        String cityID;
+        if (fuckID > 101050000){
+            cityID = cityCode.substring(0, 9)+"%";
+        }else {
+            cityID = cityCode.substring(0, 8)+"%";
+        }
+
+        Cursor cursor = db.rawQuery("SELECT * FROM City WHERE city_code LIKE ?", new String[]{cityID});
+        if (cursor.moveToFirst()) {
+            do {
+                City city = new City();
+                city.setId(cursor.getInt(cursor.getColumnIndex("id")));
+                city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
+                city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
+                list.add(city);
+            }while (cursor.moveToNext());
+        }
+
         return list;
     }
 }
